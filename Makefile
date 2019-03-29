@@ -1,5 +1,5 @@
 build:
-	g++ main.cpp -o main -lGL -lGLU -lglut
+	g++ main.cpp -o main -lGLEW -lGL -lGLU -lglut
 
 run:
 	./main
