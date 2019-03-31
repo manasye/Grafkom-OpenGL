@@ -6,7 +6,7 @@
 using namespace std;
 
 float* readVertices(FILE* inputFile, float* vertices, int* numOfVertex);
-int* readIndices(FILE* inputFile, int* indices, int* numOfIndex, char* temp);
+unsigned int* readIndices(FILE* inputFile, unsigned int * indices, int* numOfIndex, char* temp);
 float generateRand(); //Random inclusive from 0 to 1
 int seekToEOL(FILE *inputFile);
 
@@ -19,7 +19,7 @@ Polygon readPolygon(char* fileName)
     FILE* inputFile = fopen(fileName, "r");
 
     float *vertices = (float*) malloc(sizeof(float) * (numOfVertex));
-    int *indices = (int*) malloc(sizeof(int) * (numOfIndex));
+    unsigned int *indices = (unsigned int*) malloc(sizeof(int) * (numOfIndex));
 
     temp = getc(inputFile);
 
@@ -48,7 +48,7 @@ Polygon readPolygon(char* fileName)
     numOfIndex-=3;
 
     vertices = (float*) realloc(vertices, sizeof(float) * (numOfVertex));
-    indices = (int*) realloc(indices, sizeof(float) * (numOfIndex));
+    indices = (unsigned int*) realloc(indices, sizeof(float) * (numOfIndex));
 
     fclose(inputFile);
 
@@ -94,9 +94,10 @@ float* readVertices(FILE* inputFile, float* vertices, int* numOfVertex)
     return vertices;
 }
 
-int* readIndices(FILE* inputFile, int* indices, int* numOfIndex, char* temp)
+unsigned int* readIndices(FILE* inputFile, unsigned int * indices, int* numOfIndex, char* temp)
 {
-    int v1, v2, v3, res;
+    unsigned int v1, v2, v3;
+    int res;
     fgetc(inputFile);
     while ((res = fscanf(inputFile, "(%d,%d,%d)\n", &v1, &v2, &v3)) != EOF)
     {
@@ -107,7 +108,7 @@ int* readIndices(FILE* inputFile, int* indices, int* numOfIndex, char* temp)
             indices[*numOfIndex-1] = v3;
 
             *numOfIndex+=3;
-            indices = (int*) realloc(indices, *numOfIndex * sizeof(int));
+            indices = (unsigned int*) realloc(indices, *numOfIndex * sizeof(int));
 
             fgetc(inputFile);
         } else

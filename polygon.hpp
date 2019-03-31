@@ -3,7 +3,7 @@
 
 struct Polygon {
     float* vertices;
-    int* indices;
+    unsigned int* indices;
     int numOfVertex;
     int numOfIndex;
 };

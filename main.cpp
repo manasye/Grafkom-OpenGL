@@ -31,6 +31,7 @@ void init();
 // VBO = vertex buffer object | VAO = vertex array object | EBO = element buffer object
 GLuint vbo, vao, ebo;
 GLuint shaderProgram;
+Polygon poly;
 
 const char *vertexSource = R"glsl(
     #version 130
@@ -194,7 +195,7 @@ void init()
     glGenBuffers(1, &vbo);
     glGenBuffers(1, &ebo);
 
-    Polygon poly = readPolygon(FILENAME);
+    poly = readPolygon(FILENAME);
     for (int i = 0; i < poly.numOfIndex; i++) {
         cout << poly.indices[i] << endl;
     }
@@ -226,7 +227,7 @@ void display()
 
     glUseProgram(shaderProgram);
     glBindVertexArray(vao);
-    glDrawElements(GL_TRIANGLES, 9, GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_TRIANGLES, poly.numOfIndex, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
 
     /*
