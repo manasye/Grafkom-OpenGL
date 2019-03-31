@@ -13,25 +13,24 @@ void init();
 // Pentagon vertices
 float vertices[] = {
     // positions         // colors
-    0.0f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, // top
-    -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,// middle left
-    -0.25f,  -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, // bottom left
-    0.25f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f,// bottom right
-    0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f // middle right
+    0.0f, 0.5f, 0.0f, 1.0f, 1.0f, 0.0f,    // top
+    -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,   // middle left
+    -0.25f, -0.5f, 0.0f, 0.0f, 1.0f, 1.0f, // bottom left
+    0.25f, -0.5f, 0.0f, 1.0f, 0.0f, 1.0f,  // bottom right
+    0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f     // middle right
 };
 
 // Indexes, to tell how to draw the triangles to form a pentagon
 unsigned int indices[] = {
     0, 1, 2,
     0, 2, 3,
-    0, 3, 4
-};
+    0, 3, 4};
 
 // VBO = vertex buffer object | VAO = vertex array object | EBO = element buffer object
 GLuint vbo, vao, ebo;
 GLuint shaderProgram;
 
-const char * vertexSource = R"glsl(
+const char *vertexSource = R"glsl(
     #version 130
 
     in vec3 position;
@@ -47,7 +46,7 @@ const char * vertexSource = R"glsl(
     
 )glsl";
 
-const char * fragmentSource = R"glsl(
+const char *fragmentSource = R"glsl(
     #version 130
 
     in vec3 vertColor;
@@ -59,18 +58,17 @@ const char * fragmentSource = R"glsl(
     }
 )glsl";
 
-
-int main(int argc, char* argv[])
+int main(int argc, char *argv[])
 {
     glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_SINGLE|GLUT_RGB);
+    glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
     glutInitWindowSize(WIDTH, HEIGHT);
     glutCreateWindow("OpenGL Demo");
 
     glewInit();
     init();
 
-	glutDisplayFunc(display);
+    glutDisplayFunc(display);
     glutMainLoop();
     return 0;
 }
@@ -92,20 +90,21 @@ void init()
     glShaderSource(vertexShader, 1, &vertexSource, NULL);
     glCompileShader(vertexShader);
 
-    // Check shader status. If not compiled, terminate 
+    // Check shader status. If not compiled, terminate
     glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &isCompiled);
     if (isCompiled == GL_FALSE)
-    {   
+    {
         printf("Vertex shader failed to compile...\n");
         GLint maxLength = 0;
         glGetShaderiv(vertexShader, GL_INFO_LOG_LENGTH, &maxLength);
 
         // The maxLength includes the NULL character
-        std::vector<GLchar> infoLog (maxLength);
+        std::vector<GLchar> infoLog(maxLength);
         glGetShaderInfoLog(vertexShader, maxLength, &maxLength, &infoLog[0]);
-        
-        for (int i = 0; i < infoLog.size(); i++) {
-            printf("%c",infoLog[i]);
+
+        for (int i = 0; i < infoLog.size(); i++)
+        {
+            printf("%c", infoLog[i]);
         }
         printf("\n");
 
@@ -125,17 +124,18 @@ void init()
     // Check shader status
     glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &isCompiled);
     if (isCompiled == GL_FALSE)
-    {   
+    {
         printf("Fragment shader failed to compile...\n");
         GLint maxLength = 0;
         glGetShaderiv(fragmentShader, GL_INFO_LOG_LENGTH, &maxLength);
 
         // The maxLength includes the NULL character
-        std::vector<GLchar> infoLog (maxLength);
+        std::vector<GLchar> infoLog(maxLength);
         glGetShaderInfoLog(fragmentShader, maxLength, &maxLength, &infoLog[0]);
-        
-        for (int i = 0; i < infoLog.size(); i++) {
-            printf("%c",infoLog[i]);
+
+        for (int i = 0; i < infoLog.size(); i++)
+        {
+            printf("%c", infoLog[i]);
         }
         printf("\n");
 
@@ -166,7 +166,7 @@ void init()
         // The maxLength includes the NULL character
         std::vector<GLchar> infoLog(maxLength);
         glGetProgramInfoLog(shaderProgram, maxLength, &maxLength, &infoLog[0]);
-        
+
         // Don't leak shaders either.
         glDeleteShader(vertexShader);
         glDeleteShader(fragmentShader);
@@ -174,15 +174,16 @@ void init()
         glDeleteProgram(shaderProgram);
 
         // Print the log
-        for (int i = 0; i < infoLog.size(); i++) {
-            printf("%c",infoLog[i]);
+        for (int i = 0; i < infoLog.size(); i++)
+        {
+            printf("%c", infoLog[i]);
         }
         printf("\n");
-        
+
         // In this simple program, we'll just leave
         exit(0);
     }
-    
+
     // Don't need these anymore
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
@@ -201,27 +202,26 @@ void init()
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)0);
     glEnableVertexAttribArray(0);
     // Colors
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *) (3 * sizeof(float)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
     // Binding position & color array to shader program
     glBindAttribLocation(shaderProgram, 0, "position");
     glBindAttribLocation(shaderProgram, 1, "inColor");
-    
+
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
-
 }
 
 void display()
 {
-    glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
 
     glUseProgram(shaderProgram);
     glBindVertexArray(vao);
     glDrawElements(GL_TRIANGLES, 9, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
-    
+
     /*
     glBegin(GL_POLYGON);
     glColor3ub(76,175,80);
