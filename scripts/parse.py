@@ -5,7 +5,6 @@ def getIndexFromLabel(label, points):
     for point in points:
         if (point['label'] == label):
             return point['index']
-    return 0
 
 
 with open('../data/unicorn.json') as f:
