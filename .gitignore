@@ -105,5 +105,6 @@ venv.bak/
 
 a.out
 main
+filereader
 
 .vscode/

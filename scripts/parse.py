@@ -22,7 +22,7 @@ idx = 0
 for element in elements:
     if (element['-type'] == 'point'):
         points.append({'index': idx, 'label': element['-label']})
-        pointsTxt.append('({},{})'.format(
+        pointsTxt.append('V({},{})'.format(
             float(element['coords']['-x']) / 15, float(element['coords']['-y']) / 15))
         idx += 1
 
@@ -31,13 +31,13 @@ for command in commands:
         i1 = getIndexFromLabel(command['input']['-a0'], points)
         i2 = getIndexFromLabel(command['input']['-a1'], points)
         i3 = getIndexFromLabel(command['input']['-a2'], points)
-        polygonsTxt.append('({},{},{})'.format(i1, i2, i3))
+        polygonsTxt.append('P({},{},{})'.format(i1, i2, i3))
 
 
 with open('../data/unicorn.txt', 'w') as f:
-    f.write("Points\n")
+    f.write("# Points\n")
     for point in pointsTxt:
         f.write("%s\n" % point)
-    f.write("Polygon\n")
+    f.write("# Polygon\n")
     for polygon in polygonsTxt:
         f.write("%s\n" % polygon)

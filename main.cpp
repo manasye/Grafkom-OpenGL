@@ -3,7 +3,9 @@
 #include <GL/gl.h>
 #include <cstdio>
 #include <vector>
+#include "filereader.cpp"
 
+#define FILENAME "data/unicorn.txt"
 #define WIDTH 800
 #define HEIGHT 600
 
@@ -11,20 +13,20 @@ void display();
 void init();
 
 // Pentagon vertices
-float vertices[] = {
-    // positions         // colors
-    0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f,    // top
-    -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,   // middle left
-    -0.25f, -0.5f, 0.0f, 0.0f, 1.0f, 1.0f, // bottom left
-    0.25f, -0.5f, 0.0f, 1.0f, 0.0f, 1.0f,  // bottom right
-    0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f     // middle right
-};
-
-// Indexes, to tell how to draw the triangles to form a pentagon
-unsigned int indices[] = {
-    0, 1, 2,
-    0, 2, 3,
-    0, 3, 4};
+// float vertices[] = {
+//     // positions         // colors
+//     0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f,    // top
+//     -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,   // middle left
+//     -0.25f, -0.5f, 0.0f, 0.0f, 1.0f, 1.0f, // bottom left
+//     0.25f, -0.5f, 0.0f, 1.0f, 0.0f, 1.0f,  // bottom right
+//     0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f     // middle right
+// };
+//
+// // Indexes, to tell how to draw the triangles to form a pentagon
+// unsigned int indices[] = {
+//     0, 1, 2,
+//     0, 2, 3,
+//     0, 3, 4};
 
 // VBO = vertex buffer object | VAO = vertex array object | EBO = element buffer object
 GLuint vbo, vao, ebo;
@@ -43,7 +45,7 @@ const char *vertexSource = R"glsl(
         gl_Position = vec4(position, 1.0);
         vertColor = inColor;
     }
-    
+
 )glsl";
 
 const char *fragmentSource = R"glsl(
@@ -192,11 +194,16 @@ void init()
     glGenBuffers(1, &vbo);
     glGenBuffers(1, &ebo);
 
+    Polygon poly = readPolygon(FILENAME);
+    for (int i = 0; i < poly.numOfIndex; i++) {
+        cout << poly.indices[i] << endl;
+    }
+
     glBindVertexArray(vao);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, poly.numOfVertex * (sizeof(float)), poly.vertices, GL_STATIC_DRAW);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, poly.numOfIndex * (sizeof(int)), poly.indices, GL_STATIC_DRAW);
     //GLint posAttrib = glGetAttribLocation(shaderProgram, "position");
     // Positions
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)0);
