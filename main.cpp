@@ -12,22 +12,6 @@
 void display();
 void init();
 
-// Pentagon vertices
-// float vertices[] = {
-//     // positions         // colors
-//     0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f,    // top
-//     -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,   // middle left
-//     -0.25f, -0.5f, 0.0f, 0.0f, 1.0f, 1.0f, // bottom left
-//     0.25f, -0.5f, 0.0f, 1.0f, 0.0f, 1.0f,  // bottom right
-//     0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f     // middle right
-// };
-//
-// // Indexes, to tell how to draw the triangles to form a pentagon
-// unsigned int indices[] = {
-//     0, 1, 2,
-//     0, 2, 3,
-//     0, 3, 4};
-
 // VBO = vertex buffer object | VAO = vertex array object | EBO = element buffer object
 GLuint vbo, vao, ebo;
 GLuint shaderProgram;
@@ -196,9 +180,6 @@ void init()
     glGenBuffers(1, &ebo);
 
     poly = readPolygon(FILENAME);
-    for (int i = 0; i < poly.numOfIndex; i++) {
-        cout << poly.indices[i] << endl;
-    }
 
     glBindVertexArray(vao);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -230,17 +211,5 @@ void display()
     glDrawElements(GL_TRIANGLES, poly.numOfIndex, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
 
-    /*
-    glBegin(GL_POLYGON);
-    glColor3ub(76,175,80);
-		glVertex2f(-0.9f, -0.8f);
-		glVertex2f(-0.75f, -0.8f);
-		glVertex2f(-0.6f, -0.7f);
-		glVertex2f(-0.8f, -0.6f);
-		glVertex2f(-0.95f, -0.7f);
-    glEnd();
-    */
-
     glFlush();
-    //glFinish();
 }

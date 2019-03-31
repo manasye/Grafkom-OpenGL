@@ -19,7 +19,7 @@ Polygon readPolygon(char* fileName)
     FILE* inputFile = fopen(fileName, "r");
 
     float *vertices = (float*) malloc(sizeof(float) * (numOfVertex));
-    unsigned int *indices = (unsigned int*) malloc(sizeof(int) * (numOfIndex));
+    unsigned int *indices = (unsigned int*) malloc(sizeof(unsigned int) * (numOfIndex));
 
     temp = getc(inputFile);
 
@@ -48,7 +48,7 @@ Polygon readPolygon(char* fileName)
     numOfIndex-=3;
 
     vertices = (float*) realloc(vertices, sizeof(float) * (numOfVertex));
-    indices = (unsigned int*) realloc(indices, sizeof(float) * (numOfIndex));
+    indices = (unsigned int*) realloc(indices, sizeof(unsigned int) * (numOfIndex));
 
     fclose(inputFile);
 
@@ -108,7 +108,7 @@ unsigned int* readIndices(FILE* inputFile, unsigned int * indices, int* numOfInd
             indices[*numOfIndex-1] = v3;
 
             *numOfIndex+=3;
-            indices = (unsigned int*) realloc(indices, *numOfIndex * sizeof(int));
+            indices = (unsigned int*) realloc(indices, *numOfIndex * sizeof(unsigned int));
 
             fgetc(inputFile);
         } else
