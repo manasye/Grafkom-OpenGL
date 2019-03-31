@@ -13,7 +13,7 @@ void init();
 // Pentagon vertices
 float vertices[] = {
     // positions         // colors
-    0.0f, 0.5f, 0.0f, 1.0f, 1.0f, 0.0f,    // top
+    0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f,    // top
     -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,   // middle left
     -0.25f, -0.5f, 0.0f, 0.0f, 1.0f, 1.0f, // bottom left
     0.25f, -0.5f, 0.0f, 1.0f, 0.0f, 1.0f,  // bottom right
