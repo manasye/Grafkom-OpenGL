@@ -47,6 +47,12 @@ const char *fragmentSource = R"glsl(
 
 int main(int argc, char *argv[])
 {
+    if (argc < 2) {
+        poly = readPolygon(FILENAME);
+    } else {
+        poly = readPolygon(argv[1]);
+    }
+
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
     glutInitWindowSize(WIDTH, HEIGHT);
@@ -178,8 +184,6 @@ void init()
     glGenVertexArrays(1, &vao);
     glGenBuffers(1, &vbo);
     glGenBuffers(1, &ebo);
-
-    poly = readPolygon(FILENAME);
 
     glBindVertexArray(vao);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
