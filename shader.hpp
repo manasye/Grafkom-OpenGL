@@ -9,6 +9,7 @@
 
 class Shader {
     public:
+        // CALL THESE FUNCTIONS ONLY AFTER INITIALIZING GL
         Shader(const char * vertexSource, const char * fragmentSource);
         Shader(std::ifstream * vertexSourceFile, std::ifstream * fragmentSourceFile);
         ~Shader();

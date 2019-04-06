@@ -1,3 +1,6 @@
+#ifndef __FILEREADER_CPP
+#define __FILEREADER_CPP
+
 #include <stdlib.h>
 #include <stdio.h>
 #include "polygon.hpp"
@@ -140,3 +143,5 @@ float generateRand()
 {
     return static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
 }
+
+#endif

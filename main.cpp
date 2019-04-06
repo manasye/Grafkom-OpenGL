@@ -6,7 +6,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <cstdio>
 #include <vector>
-#include "filereader.cpp"
+#include "drawhelper.cpp"
 #include "shader.hpp"
 
 #define FILENAME "data/pentagon.txt"
@@ -19,16 +19,16 @@ void init();
 // VBO = vertex buffer object | VAO = vertex array object | EBO = element buffer object
 GLuint vbo, vao, ebo;
 Shader * shader;
+DrawHelper drawer;
 Polygon poly;
+
+int g_argc;
+char ** g_argv;
 
 int main(int argc, char *argv[])
 {
-    if (argc < 2) {
-        poly = readPolygon(FILENAME);
-    } else {
-        poly = readPolygon(argv[1]);
-    }
-
+    g_argc = argc;
+    g_argv = argv;
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
     glutInitWindowSize(WIDTH, HEIGHT);
@@ -52,7 +52,7 @@ void init()
 
     //GLfloat aspect = (GLfloat) WIDTH / (GLfloat) HEIGHT;
     
-    glViewport(0,0,WIDTH,HEIGHT);
+    //glViewport(0,0,WIDTH,HEIGHT);
     glMatrixMode(GL_MODELVIEW); 
     glLoadIdentity();
     
@@ -68,28 +68,15 @@ void init()
         exit(0);
     }
 
-    glGenVertexArrays(1, &vao);
-    glGenBuffers(1, &vbo);
-    glGenBuffers(1, &ebo);
-
-    glBindVertexArray(vao);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, poly.numOfVertex * (sizeof(float)), poly.vertices, GL_STATIC_DRAW);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, poly.numOfIndex * (sizeof(int)), poly.indices, GL_STATIC_DRAW);
-    //GLint posAttrib = glGetAttribLocation(shaderProgram, "position");
-    // Positions
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)0);
-    glEnableVertexAttribArray(0);
-    // Colors
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-    // Binding position & color array to shader program
-    glBindAttribLocation(shader->getProgram(), 0, "position");
-    glBindAttribLocation(shader->getProgram(), 1, "inColor");
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
+    if (g_argc < 2) {
+        drawer.addFromFile(FILENAME);
+        drawer.addFromFile("data/cube.txt");
+    } else {
+        for (int i = 1; i < g_argc; i++) {
+            drawer.addFromFile(g_argv[i]);
+        }
+    }
+    //drawer.remove(0);
 }
 
 void display()
@@ -111,9 +98,7 @@ void display()
     glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(),"view"),1,GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(),"projection"),1,GL_FALSE, glm::value_ptr(projection));
     
-    glBindVertexArray(vao);
-    glDrawElements(GL_TRIANGLES, poly.numOfIndex, GL_UNSIGNED_INT, 0);
-    glBindVertexArray(0);
+    drawer.drawAll();
 
     glFlush();
 }
