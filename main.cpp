@@ -1,6 +1,9 @@
 #include <GL/glew.h>
 #include <GL/glut.h>
 #include <GL/gl.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include <cstdio>
 #include <vector>
 #include "filereader.cpp"
@@ -41,14 +44,18 @@ int main(int argc, char *argv[])
 
 void init()
 {
-    glClearColor(0, 0, 0, 0);
-    glDisable(GL_DEPTH_TEST);
+    glClearColor(0, 0, 0, 1.0f);
+    glClearDepth(1.0f);
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LEQUAL);
+    glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 
-    glMatrixMode(GL_PROJECTION);
+    //GLfloat aspect = (GLfloat) WIDTH / (GLfloat) HEIGHT;
+    
+    glViewport(0,0,WIDTH,HEIGHT);
+    glMatrixMode(GL_MODELVIEW); 
     glLoadIdentity();
-    //glOrtho(0.0, WIDTH-1, HEIGHT-1, 0, -1.0, 1.0);
-    glMatrixMode(GL_MODELVIEW);
-
+    
     std::ifstream vertexFile, fragmentFile;
     vertexFile.open("testvertex.vert");
     fragmentFile.open("testfragment.frag");
@@ -91,6 +98,19 @@ void display()
     glLoadIdentity();
 
     shader->useProgram();
+
+    glm::mat4 view = glm::mat4(1.0f);
+    glm::mat4 projection = glm::mat4(1.0f);
+    glm::mat4 model = glm::mat4(1.0f);
+
+    projection = glm::perspective(glm::radians(45.0f), (float) WIDTH / (float) HEIGHT, 0.1f, 100.0f);
+    view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+    model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+
+    glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(),"model"),1,GL_FALSE, glm::value_ptr(model));
+    glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(),"view"),1,GL_FALSE, glm::value_ptr(view));
+    glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(),"projection"),1,GL_FALSE, glm::value_ptr(projection));
+    
     glBindVertexArray(vao);
     glDrawElements(GL_TRIANGLES, poly.numOfIndex, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
