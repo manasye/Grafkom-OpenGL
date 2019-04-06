@@ -6,7 +6,7 @@
 #include "filereader.cpp"
 #include "shader.hpp"
 
-#define FILENAME "data/unicorn.txt"
+#define FILENAME "data/pentagon.txt"
 #define WIDTH 800
 #define HEIGHT 600
 

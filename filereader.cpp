@@ -65,21 +65,22 @@ Polygon readPolygon(char* fileName)
 float* readVertices(FILE* inputFile, float* vertices, int* numOfVertex)
 {
     int res;
-    float x, y;
+    float x, y, z;
+    float r, g, b;
 
-    while ((res = fscanf(inputFile, "(%f,%f)\n", &x, &y)) != EOF)
+    while ((res = fscanf(inputFile, "(%f,%f,%f)(%f,%f,%f)\n", &x, &y, &z, &r, &g, &b)) != EOF)
     {
-        if (res == 2)
+        if (res == 6)
         {
             //Position
             vertices[*numOfVertex-6] = x;
             vertices[*numOfVertex-5] = y;
-            vertices[*numOfVertex-4] = 0.0f;
+            vertices[*numOfVertex-4] = z;
 
             //Color
-            vertices[*numOfVertex-3] = generateRand();
-            vertices[*numOfVertex-2] = generateRand();
-            vertices[*numOfVertex-1] = generateRand();
+            vertices[*numOfVertex-3] = r;
+            vertices[*numOfVertex-2] = g;
+            vertices[*numOfVertex-1] = b;
 
             *numOfVertex+=6;
             vertices = (float*) realloc(vertices, (*numOfVertex) * sizeof(float));
