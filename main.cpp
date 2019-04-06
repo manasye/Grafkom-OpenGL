@@ -4,6 +4,7 @@
 #include <cstdio>
 #include <vector>
 #include "filereader.cpp"
+#include "shader.hpp"
 
 #define FILENAME "data/unicorn.txt"
 #define WIDTH 800
@@ -14,36 +15,8 @@ void init();
 
 // VBO = vertex buffer object | VAO = vertex array object | EBO = element buffer object
 GLuint vbo, vao, ebo;
-GLuint shaderProgram;
+Shader * shader;
 Polygon poly;
-
-const char *vertexSource = R"glsl(
-    #version 130
-
-    in vec3 position;
-    in vec3 inColor;
-
-    out vec3 vertColor;
-
-    void main()
-    {
-        gl_Position = vec4(position, 1.0);
-        vertColor = inColor;
-    }
-
-)glsl";
-
-const char *fragmentSource = R"glsl(
-    #version 130
-
-    in vec3 vertColor;
-    out vec4 outColor;
-
-    void main()
-    {
-        outColor = vec4(vertColor, 1.0f);
-    }
-)glsl";
 
 int main(int argc, char *argv[])
 {
@@ -76,110 +49,17 @@ void init()
     //glOrtho(0.0, WIDTH-1, HEIGHT-1, 0, -1.0, 1.0);
     glMatrixMode(GL_MODELVIEW);
 
-    GLint isCompiled = 0;
+    std::ifstream vertexFile, fragmentFile;
+    vertexFile.open("testvertex.vert");
+    fragmentFile.open("testfragment.frag");
 
-    // Compile vertex shader
-    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShader, 1, &vertexSource, NULL);
-    glCompileShader(vertexShader);
+    shader = new Shader(&vertexFile, &fragmentFile);
 
-    // Check shader status. If not compiled, terminate
-    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &isCompiled);
-    if (isCompiled == GL_FALSE)
-    {
-        printf("Vertex shader failed to compile...\n");
-        GLint maxLength = 0;
-        glGetShaderiv(vertexShader, GL_INFO_LOG_LENGTH, &maxLength);
-
-        // The maxLength includes the NULL character
-        std::vector<GLchar> infoLog(maxLength);
-        glGetShaderInfoLog(vertexShader, maxLength, &maxLength, &infoLog[0]);
-
-        for (int i = 0; i < infoLog.size(); i++)
-        {
-            printf("%c", infoLog[i]);
-        }
-        printf("\n");
-
-        // We don't need the shader anymore.
-        glDeleteShader(vertexShader);
-
-        // Use the infoLog as you see fit.
-        // In this simple program, we'll just leave
+    if (shader->isProgramCompiled() == GL_FALSE) {
+        printf("Shader compilation failed...\n");
+        shader->printCompileInfo();
         exit(0);
     }
-
-    // Compile fragment shader
-    GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &fragmentSource, NULL);
-    glCompileShader(fragmentShader);
-
-    // Check shader status
-    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &isCompiled);
-    if (isCompiled == GL_FALSE)
-    {
-        printf("Fragment shader failed to compile...\n");
-        GLint maxLength = 0;
-        glGetShaderiv(fragmentShader, GL_INFO_LOG_LENGTH, &maxLength);
-
-        // The maxLength includes the NULL character
-        std::vector<GLchar> infoLog(maxLength);
-        glGetShaderInfoLog(fragmentShader, maxLength, &maxLength, &infoLog[0]);
-
-        for (int i = 0; i < infoLog.size(); i++)
-        {
-            printf("%c", infoLog[i]);
-        }
-        printf("\n");
-
-        // We don't need the shader anymore.
-        glDeleteShader(vertexShader);
-        glDeleteShader(fragmentShader);
-
-        // Use the infoLog as you see fit.
-        // In this simple program, we'll just leave
-        exit(0);
-    }
-
-    // Link both previous shader to the "program"
-    shaderProgram = glCreateProgram();
-    glAttachShader(shaderProgram, vertexShader);
-    glAttachShader(shaderProgram, fragmentShader);
-    //glBindFragDataLocation(shaderProgram, 0, "outColor");
-    glLinkProgram(shaderProgram);
-
-    // Check shader status
-    glGetProgramiv(shaderProgram, GL_LINK_STATUS, (int *)&isCompiled);
-    if (isCompiled == GL_FALSE)
-    {
-        printf("Shader program failed to link...\n");
-        GLint maxLength = 0;
-        glGetProgramiv(shaderProgram, GL_INFO_LOG_LENGTH, &maxLength);
-
-        // The maxLength includes the NULL character
-        std::vector<GLchar> infoLog(maxLength);
-        glGetProgramInfoLog(shaderProgram, maxLength, &maxLength, &infoLog[0]);
-
-        // Don't leak shaders either.
-        glDeleteShader(vertexShader);
-        glDeleteShader(fragmentShader);
-        // We don't need the program anymore.
-        glDeleteProgram(shaderProgram);
-
-        // Print the log
-        for (int i = 0; i < infoLog.size(); i++)
-        {
-            printf("%c", infoLog[i]);
-        }
-        printf("\n");
-
-        // In this simple program, we'll just leave
-        exit(0);
-    }
-
-    // Don't need these anymore
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
 
     glGenVertexArrays(1, &vao);
     glGenBuffers(1, &vbo);
@@ -198,8 +78,8 @@ void init()
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
     // Binding position & color array to shader program
-    glBindAttribLocation(shaderProgram, 0, "position");
-    glBindAttribLocation(shaderProgram, 1, "inColor");
+    glBindAttribLocation(shader->getProgram(), 0, "position");
+    glBindAttribLocation(shader->getProgram(), 1, "inColor");
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
@@ -210,7 +90,7 @@ void display()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
 
-    glUseProgram(shaderProgram);
+    shader->useProgram();
     glBindVertexArray(vao);
     glDrawElements(GL_TRIANGLES, poly.numOfIndex, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
