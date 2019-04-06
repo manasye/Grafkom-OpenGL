@@ -1,4 +1,9 @@
 import json
+from random import randint
+
+
+def getRandomColor():
+    return randint(0, 9) / 10
 
 
 def getIndexFromLabel(label, points):
@@ -21,8 +26,8 @@ idx = 0
 for element in elements:
     if (element['-type'] == 'point'):
         points.append({'index': idx, 'label': element['-label']})
-        pointsTxt.append('V({},{})'.format(
-            float(element['coords']['-x']) / 15, float(element['coords']['-y']) / 15))
+        pointsTxt.append('V({},{},{})({},{},{})'.format(
+            float(element['coords']['-x']) / 15, float(element['coords']['-y']) / 15, 0, getRandomColor(), getRandomColor(), getRandomColor()))
         idx += 1
 
 for command in commands:
