@@ -13,6 +13,8 @@
 #define WIDTH 800
 #define HEIGHT 600
 
+void handleMouseClick(int button, int state, int x, int y);
+void handleMouseMove(int x, int y);
 void display();
 void init();
 
@@ -21,6 +23,15 @@ GLuint vbo, vao, ebo;
 Shader *shader;
 DrawHelper drawer;
 Polygon poly;
+// Camera "distance" to object
+float radius = 5.0f;
+float mouseSensitivity = 0.05f;
+bool isDragging = false;
+int rotDX, rotDY, prevX, prevY;
+float prevRotX = 0.0f;
+float prevRotZ = 0.0f;
+// Camera position
+glm::vec3 cameraPos = glm::vec3(sin(prevRotX) * radius, 0.0f, cos(prevRotZ) * radius);
 
 int g_argc;
 char **g_argv;
@@ -38,6 +49,8 @@ int main(int argc, char *argv[])
     init();
 
     glutDisplayFunc(display);
+    glutMouseFunc(handleMouseClick);
+    glutMotionFunc(handleMouseMove);
     glutMainLoop();
     return 0;
 }
@@ -84,6 +97,38 @@ void init()
     //drawer.remove(0);
 }
 
+void handleMouseMove(int x, int y)
+{
+    if (isDragging)
+    {
+        rotDX = prevX - x;
+        rotDY = prevY - y;
+        prevX = x;
+        prevY = y;
+        prevRotX += ((float)rotDX * mouseSensitivity);
+        prevRotZ += ((float)rotDX * mouseSensitivity);
+        cameraPos = glm::vec3(sin(prevRotX) * radius, 0.0f, cos(prevRotZ) * radius);
+        glutPostRedisplay();
+    }
+}
+
+void handleMouseClick(int button, int state, int x, int y)
+{
+    if (button == GLUT_RIGHT_BUTTON)
+    {
+        if (state == GLUT_DOWN) 
+        {
+            isDragging = true;
+            prevX = x;
+            prevY = y;
+        }
+        else // GLUT_UP
+        {
+            isDragging = false;
+        }
+    }
+}
+
 void display()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -91,13 +136,15 @@ void display()
 
     shader->useProgram();
 
-    glm::mat4 view = glm::mat4(1.0f);
+    glm::vec3 cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
+    glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f); 
+
+    glm::mat4 view = glm::lookAt(cameraPos, cameraTarget, cameraUp);
     glm::mat4 projection = glm::mat4(1.0f);
     glm::mat4 model = glm::mat4(1.0f);
 
     projection = glm::perspective(glm::radians(45.0f), (float)WIDTH / (float)HEIGHT, 0.1f, 100.0f);
-    view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
-    model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+    model = glm::rotate(model, glm::radians(-75.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 
     glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "model"), 1, GL_FALSE, glm::value_ptr(model));
     glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "view"), 1, GL_FALSE, glm::value_ptr(view));
