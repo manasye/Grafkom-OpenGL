@@ -9,12 +9,13 @@
 #include "drawhelper.cpp"
 #include "shader.hpp"
 
-#define FILENAME "data/pentagon.txt"
+#define FILENAME "data/car.txt"
 #define WIDTH 800
 #define HEIGHT 600
 
 void handleMouseClick(int button, int state, int x, int y);
 void handleMouseMove(int x, int y);
+void handleSpecialKeyboard(int key, int x, int y);
 void display();
 void init();
 
@@ -23,6 +24,7 @@ GLuint vbo, vao, ebo;
 Shader *shader;
 DrawHelper drawer;
 Polygon poly;
+
 // Camera "distance" to object
 float radius = 5.0f;
 float mouseSensitivity = 0.05f;
@@ -30,6 +32,11 @@ bool isDragging = false;
 int rotDX, rotDY, prevX, prevY;
 float prevRotX = 0.0f;
 float prevRotZ = 0.0f;
+
+// Keyboard rotation attribute
+int deltaKeyboard = 1;
+float keyboardSensitivity = 0.1f;
+
 // Camera position
 glm::vec3 cameraPos = glm::vec3(sin(prevRotX) * radius, 0.0f, cos(prevRotZ) * radius);
 
@@ -50,6 +57,7 @@ int main(int argc, char *argv[])
 
     glutDisplayFunc(display);
     glutMouseFunc(handleMouseClick);
+    glutSpecialFunc(handleSpecialKeyboard);
     glutMotionFunc(handleMouseMove);
     glutMainLoop();
     return 0;
@@ -85,7 +93,7 @@ void init()
     if (g_argc < 2)
     {
         drawer.addFromFile(FILENAME);
-        drawer.addFromFile("data/cube.txt");
+        drawer.addFromFile("data/car.txt");
     }
     else
     {
@@ -112,11 +120,29 @@ void handleMouseMove(int x, int y)
     }
 }
 
+void handleSpecialKeyboard(int key, int x, int y)
+{
+    rotDX = deltaKeyboard;
+    rotDY = deltaKeyboard;
+    if (key == GLUT_KEY_LEFT)
+    {
+        prevRotX += ((float)rotDX * keyboardSensitivity);
+        prevRotZ += ((float)rotDX * keyboardSensitivity);
+    }
+    else if (key == GLUT_KEY_RIGHT)
+    {
+        prevRotX -= ((float)rotDX * keyboardSensitivity);
+        prevRotZ -= ((float)rotDX * keyboardSensitivity);
+    }
+    cameraPos = glm::vec3(sin(prevRotX) * radius, 0.0f, cos(prevRotZ) * radius);
+    glutPostRedisplay();
+}
+
 void handleMouseClick(int button, int state, int x, int y)
 {
     if (button == GLUT_RIGHT_BUTTON)
     {
-        if (state == GLUT_DOWN) 
+        if (state == GLUT_DOWN)
         {
             isDragging = true;
             prevX = x;
@@ -137,7 +163,7 @@ void display()
     shader->useProgram();
 
     glm::vec3 cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
-    glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f); 
+    glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 
     glm::mat4 view = glm::lookAt(cameraPos, cameraTarget, cameraUp);
     glm::mat4 projection = glm::mat4(1.0f);
