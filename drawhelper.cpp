@@ -34,8 +34,14 @@ void DrawHelper::add(Polygon polygon) {
     glBindVertexArray(0);
 }
 
+void DrawHelper::add(std::vector<Polygon> * poly) {
+    for (std::vector<Polygon>::iterator ptr = poly->begin(); ptr != poly->end(); ++ptr) {
+        this->add(*ptr);
+    }
+}
+
 void DrawHelper::addFromFile(char * filename) {
-    Polygon poly = readPolygon(filename); 
+    std::vector<Polygon> * poly = readPolygon(filename); 
     this->add(poly);
 }
 
