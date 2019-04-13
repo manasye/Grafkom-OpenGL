@@ -11,6 +11,7 @@ class DrawHelper {
         DrawHelper();
         // CALL THESE FUNCTIONS ONLY AFTER INITIALIZING GL
         void add(Polygon polygon);
+        void add(std::vector<Polygon> * polyVec);
         void addFromFile(char * filename);
         void draw(int i);
         void drawAll();

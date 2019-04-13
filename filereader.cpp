@@ -5,143 +5,71 @@
 #include <stdio.h>
 #include "polygon.hpp"
 #include <iostream>
+#include <fstream>
+#include <string>
+#include <sstream>
+#include "lib/json.hpp"
 
 using namespace std;
+using namespace nlohmann;
 
-float* readVertices(FILE* inputFile, float* vertices, int* numOfVertex);
-unsigned int* readIndices(FILE* inputFile, unsigned int * indices, int* numOfIndex, char* temp);
-float generateRand(); //Random inclusive from 0 to 1
-int seekToEOL(FILE *inputFile);
-
-Polygon readPolygon(char* fileName)
+std::vector<Polygon> * readPolygon(char * fileName)
 {
     char temp;
     int numOfVertex = 6;
     int numOfIndex = 3;
+    ifstream inputFile;
+    json inputJson;
 
-    FILE* inputFile = fopen(fileName, "r");
+    std::vector<Polygon> * poly = new std::vector<Polygon>();
 
-    float *vertices = (float*) malloc(sizeof(float) * (numOfVertex));
-    unsigned int *indices = (unsigned int*) malloc(sizeof(unsigned int) * (numOfIndex));
+    inputFile.open(fileName);
+    inputFile >> inputJson;
 
-    temp = getc(inputFile);
+    //cout << inputJson.dump();
 
-    while (temp != EOF)
-    {
-        if (temp == '#')
-        {
-            temp = seekToEOL(inputFile);
-        }
-        else if ((temp == 'V') || (temp == 'v'))
-        {
-            vertices = readVertices(inputFile, vertices, &numOfVertex);
-            temp = getc(inputFile);
-        }
-        else if ((temp == 'P') || (temp == 'p'))
-        {
-            indices = readIndices(inputFile, indices, &numOfIndex, &temp);
-        }
-        else
-        {
-            temp = getc(inputFile);
-        }
+    json textures = inputJson["textures"];
+    json objects = inputJson["objects"];
+
+    if (!textures.empty()) {
+        // will be implemented later
     }
 
-    numOfVertex-=6;
-    numOfIndex-=3;
+    if (!objects.empty()) {
+        for (json::iterator it = objects.begin(); it != objects.end(); ++it) {
+            Polygon temp;
+            json points = (*it)["points"];
+            json colors = (*it)["colors"];
+            json indices = (*it)["indices"];
 
-    vertices = (float*) realloc(vertices, sizeof(float) * (numOfVertex));
-    indices = (unsigned int*) realloc(indices, sizeof(unsigned int) * (numOfIndex));
+            temp.vertices = (float *) malloc(points.size() * 2 * sizeof(float));
+            temp.numOfVertex = 2 * points.size();
+            temp.indices = (unsigned int *) malloc(indices.size() * sizeof(int));
+            temp.numOfIndex = indices.size();
+            
+            for (int i = 0; i < points.size(); i+= 3) {
+                temp.vertices[(i * 2)] = (float) points[i];
+                temp.vertices[(i * 2) + 1] = (float) points[i + 1];
+                temp.vertices[(i * 2) + 2] = (float) points[i + 2];
+                temp.vertices[(i * 2) + 3] = (float) colors[i];
+                temp.vertices[(i * 2) + 4] = (float) colors[i + 1];
+                temp.vertices[(i * 2) + 5] = (float) colors[i + 2];
+            }
+            for (int i = 0; i < indices.size(); i++) {
+                temp.indices[i] = indices[i];
+            }
 
-    fclose(inputFile);
-
-    Polygon poly = {
-        vertices,
-        indices,
-        numOfVertex,
-        numOfIndex
-    };
-
+            /*
+            for (int i = 0; i < temp.numOfVertex; i++) {
+                cout << temp.vertices[i] << " ";
+            }
+            cout << endl;
+            */
+            poly->push_back(temp);
+        }
+    }
+    
     return poly;
-}
-
-float* readVertices(FILE* inputFile, float* vertices, int* numOfVertex)
-{
-    int res;
-    float x, y, z;
-    float r, g, b;
-
-    while ((res = fscanf(inputFile, "(%f,%f,%f)(%f,%f,%f)\n", &x, &y, &z, &r, &g, &b)) != EOF)
-    {
-        if (res == 6)
-        {
-            //Position
-            vertices[*numOfVertex-6] = x;
-            vertices[*numOfVertex-5] = y;
-            vertices[*numOfVertex-4] = z;
-
-            //Color
-            vertices[*numOfVertex-3] = r;
-            vertices[*numOfVertex-2] = g;
-            vertices[*numOfVertex-1] = b;
-
-            *numOfVertex+=6;
-            vertices = (float*) realloc(vertices, (*numOfVertex) * sizeof(float));
-
-            fgetc(inputFile);
-        } else
-        {
-            break;
-        }
-    }
-
-    return vertices;
-}
-
-unsigned int* readIndices(FILE* inputFile, unsigned int * indices, int* numOfIndex, char* temp)
-{
-    unsigned int v1, v2, v3;
-    int res;
-    fgetc(inputFile);
-    while ((res = fscanf(inputFile, "(%d,%d,%d)\n", &v1, &v2, &v3)) != EOF)
-    {
-        if (res == 3)
-        {
-            indices[*numOfIndex-3] = v1;
-            indices[*numOfIndex-2] = v2;
-            indices[*numOfIndex-1] = v3;
-
-            *numOfIndex+=3;
-            indices = (unsigned int*) realloc(indices, *numOfIndex * sizeof(unsigned int));
-
-            fgetc(inputFile);
-        } else
-        {
-            break;
-        }
-    }
-
-    if (res == EOF)
-    {
-        *temp = res;
-    }
-
-    return indices;
-}
-
-int seekToEOL(FILE* inputFile)
-{
-    char c = getc(inputFile);
-    while ((c != '\n') && (c != EOF))
-    {
-        c = getc(inputFile);
-    }
-    return c;
-}
-
-float generateRand()
-{
-    return static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
 }
 
 #endif

@@ -20,10 +20,8 @@ void display();
 void init();
 
 // VBO = vertex buffer object | VAO = vertex array object | EBO = element buffer object
-GLuint vbo, vao, ebo;
 Shader *shader;
 DrawHelper drawer;
-Polygon poly;
 
 // Camera "distance" to object
 float radius = 5.0f;
