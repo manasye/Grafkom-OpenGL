@@ -15,9 +15,6 @@ using namespace nlohmann;
 
 std::vector<Polygon> * readPolygon(char * fileName)
 {
-    char temp;
-    int numOfVertex = 6;
-    int numOfIndex = 3;
     ifstream inputFile;
     json inputJson;
 

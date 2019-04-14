@@ -9,7 +9,6 @@
 #include "drawhelper.cpp"
 #include "shader.hpp"
 
-#define FILENAME "data/car.txt"
 #define WIDTH 800
 #define HEIGHT 600
 
@@ -90,17 +89,16 @@ void init()
 
     if (g_argc < 2)
     {
-        drawer.addFromFile(FILENAME);
-        drawer.addFromFile("data/car.json");
+        drawer.loadFromFile("data/car.json");
     }
     else
     {
         for (int i = 1; i < g_argc; i++)
         {
-            drawer.addFromFile(g_argv[i]);
+            drawer.loadFromFile(g_argv[i]);
         }
     }
-    //drawer.remove(0);
+
 }
 
 void handleMouseMove(int x, int y)
