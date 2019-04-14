@@ -1,5 +1,8 @@
 {
     "comments" : "Keep your comments short, 'cause it's still loaded into the program & affects load time",
+    "textures" : [
+        "./data/textures/wheel.png"
+    ],
     "objects" : [
         {
             "comments" : "Body",
@@ -253,6 +256,21 @@
                 4,8,10,
                 4,5,10,
                 5,10,11
+            ],
+            "texIndex" : 0,
+            "texPos" : [
+                0.2,0.0,
+                0.8,0.0,
+                0.0, 0.5,
+                1, 0.5,
+                0.2,1.0,
+                0.8,1.0,
+                0.2,0.0,
+                0.8,0.0,
+                0.0, 0.5,
+                1, 0.5,
+                0.2,1.0,
+                0.8,1.0
             ]
         },
         {

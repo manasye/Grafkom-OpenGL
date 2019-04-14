@@ -82,10 +82,12 @@ void DrawHelper::loadFromFile(const char * filename) {
             json indices = (*it)["indices"];
             json texCoord = (*it)["texPos"];
 
+            // Allocating array for vertex and indices
             temp.numOfVertex = 2 * points.size() + ((points.size() / 3) * 2);
             temp.vertices = (float *) malloc(temp.numOfVertex * sizeof(float));
             temp.numOfIndex = indices.size();
             temp.indices = (unsigned int *) malloc(temp.numOfIndex * sizeof(int));
+            // If a texture is assigned, use it
             try {
                 temp.texture = (*it)["texIndex"];
             } catch (const std::exception& e) {
@@ -101,6 +103,7 @@ void DrawHelper::loadFromFile(const char * filename) {
                 temp.vertices[vPointer + 3] = (float) colors[i];
                 temp.vertices[vPointer + 4] = (float) colors[i + 1];
                 temp.vertices[vPointer + 5] = (float) colors[i + 2];
+                // If texture coordinates is supplied, use it
                 if (!texCoord.empty()) {
                     temp.vertices[vPointer + 6] = (float) texCoord[tPointer];
                     temp.vertices[vPointer + 7] = (float) texCoord[tPointer + 1];
@@ -124,33 +127,45 @@ void DrawHelper::loadFromFile(const char * filename) {
 void DrawHelper::loadTexture(const char * filename) {
     int width, height, nrChannels;
 
+    // Load image
     unsigned char * data = stbi_load(filename, &width, &height, &nrChannels, 0);
     
+    // Gen & bind texture
     textures.push_back(0);
     glGenTextures(1, &(textures[textures.size() - 1]));
     glBindTexture(GL_TEXTURE_2D, textures[textures.size() - 1]);
 
+    // Parameters used specifying how the texture should be generated
+    // Also tells how the mipmaps should be generated as well
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     if (data) {
+        // Dunno why, but this 4 commands are useful
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
         glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
         glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
         glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        // The actual conversion from image to textures
+        if (nrChannels == 4) {
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+        } else {
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        }
         glGenerateMipmap(GL_TEXTURE_2D);
     } else {
         printf("[WARN] Failed to load %s ...\n",filename);
     }
     
+    // Frees raw image data from memory, since it's texture is already built
     stbi_image_free(data);
 }
 
 
 void DrawHelper::draw(int i) {
+    // If this polygon has a texture associated, use it
     if (poly[i].texture != -1) {
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, textures[poly[i].texture]);
