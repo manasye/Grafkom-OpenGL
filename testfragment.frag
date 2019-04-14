@@ -9,5 +9,9 @@ out vec4 FragColor;
 
 void main()
 {
-    FragColor = texture(thisTexture, texCoord);
+    if (texCoord == vec2(-999, -999)) {
+        FragColor = vec4(vertColor, 1.0);
+    } else {
+        FragColor = texture(thisTexture, texCoord);
+    }
 }

@@ -54,10 +54,9 @@ void DrawHelper::add(std::vector<Polygon> * poly) {
 }
 
 void DrawHelper::loadFromFile(const char * filename) {
+    // Opening & converting JSON file to internal representation
     ifstream inputFile;
     json inputJson;
-
-    std::vector<Polygon> * newPoly = new std::vector<Polygon>();
 
     inputFile.open(filename);
     inputFile >> inputJson;
@@ -65,6 +64,7 @@ void DrawHelper::loadFromFile(const char * filename) {
     json textures = inputJson["textures"];
     json objects = inputJson["objects"];
 
+    // If there are textures defined
     if (!textures.empty()) {
         for (int i = 0; i < textures.size(); i++) {
             string current = textures[i].get<string>();
@@ -73,6 +73,7 @@ void DrawHelper::loadFromFile(const char * filename) {
         }
     }
 
+    // If there are objects defined
     if (!objects.empty()) {
         for (json::iterator it = objects.begin(); it != objects.end(); ++it) {
             Polygon temp;
@@ -81,11 +82,15 @@ void DrawHelper::loadFromFile(const char * filename) {
             json indices = (*it)["indices"];
             json texCoord = (*it)["texPos"];
 
-            temp.numOfVertex = 2 * points.size() + texCoord.size();
+            temp.numOfVertex = 2 * points.size() + ((points.size() / 3) * 2);
             temp.vertices = (float *) malloc(temp.numOfVertex * sizeof(float));
             temp.numOfIndex = indices.size();
             temp.indices = (unsigned int *) malloc(temp.numOfIndex * sizeof(int));
-            temp.texture = (*it)["texIndex"];
+            try {
+                temp.texture = (*it)["texIndex"];
+            } catch (const std::exception& e) {
+                temp.texture = -1;
+            }
             
             int tPointer = 0;
             int vPointer = 0;
@@ -96,21 +101,24 @@ void DrawHelper::loadFromFile(const char * filename) {
                 temp.vertices[vPointer + 3] = (float) colors[i];
                 temp.vertices[vPointer + 4] = (float) colors[i + 1];
                 temp.vertices[vPointer + 5] = (float) colors[i + 2];
-                temp.vertices[vPointer + 6] = (float) texCoord[tPointer];
-                temp.vertices[vPointer + 7] = (float) texCoord[tPointer + 1];
-                vPointer+= 8;
+                if (!texCoord.empty()) {
+                    temp.vertices[vPointer + 6] = (float) texCoord[tPointer];
+                    temp.vertices[vPointer + 7] = (float) texCoord[tPointer + 1];
+                } else {
+                    temp.vertices[vPointer + 6] = -999;
+                    temp.vertices[vPointer + 7] = -999;
+                }
                 tPointer+= 2;
+                vPointer+= 8;
             }
 
             for (int i = 0; i < indices.size(); i++) {
                 temp.indices[i] = indices[i];
             }
 
-            newPoly->push_back(temp);
+            this->add(temp);
         }
     }
-    
-    this->add(newPoly);
 }
 
 void DrawHelper::loadTexture(const char * filename) {
