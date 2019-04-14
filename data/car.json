@@ -4,7 +4,8 @@
         "./data/textures/wheel.png",
         "./data/textures/side_car.png",
         "./data/textures/glass.jpg",
-        "./data/textures/front_car.png"
+        "./data/textures/front_car.png",
+        "./data/textures/back_car.png"
     ],
     "objects": [{
             "comments": "Top Body",
@@ -151,7 +152,7 @@
                 0, 1, 2,
                 1, 2, 3
             ],
-            "texIndex" : 3,
+            "texIndex" : 4,
             "texPos" : [
                 0,0,
                 0,1,
