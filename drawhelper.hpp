@@ -12,11 +12,12 @@ class DrawHelper {
         // CALL THESE FUNCTIONS ONLY AFTER INITIALIZING GL
         void add(Polygon polygon);
         void add(std::vector<Polygon> * polyVec);
-        void loadFromFile(char * filename);
-        void loadTexture(char * filename);
+        void loadFromFile(const char * filename);
+        void loadTexture(const char * filename);
         void draw(int i);
         void drawAll();
-        void remove(int i);
+        void removeObject(int i);
+        void removeTexture(int i);
 
     private:
         std::vector<Polygon> poly;
