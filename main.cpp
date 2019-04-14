@@ -91,7 +91,7 @@ void init()
     if (g_argc < 2)
     {
         drawer.addFromFile(FILENAME);
-        drawer.addFromFile("data/car.txt");
+        drawer.addFromFile("data/car.json");
     }
     else
     {
