@@ -152,9 +152,11 @@ void handleMouseClick(int button, int state, int x, int y)
 }
 
 void display()
-{   
+{
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
+
+    glm::vec3 lightPos0(0.f, 0.f, 2.f);
 
     shader->useProgram();
 
@@ -171,6 +173,8 @@ void display()
     glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "model"), 1, GL_FALSE, glm::value_ptr(model));
     glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "view"), 1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+
+    glUniform3fv(glGetUniformLocation(shader->getProgram(), "lightPos0"), 1, glm::value_ptr(lightPos0));
 
     drawer.drawAll();
 

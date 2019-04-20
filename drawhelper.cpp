@@ -42,6 +42,10 @@ void DrawHelper::add(Polygon polygon) {
     // Texture Position
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(6 * sizeof(float)));
     glEnableVertexAttribArray(2);
+    // Normal
+    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(8 * sizeof(float)));
+    glEnableVertexAttribArray(3);
+
     // De-bind to allow other VAO/VBO/EBO to be allocated
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
@@ -81,9 +85,10 @@ void DrawHelper::loadFromFile(const char * filename) {
             json colors = (*it)["colors"];
             json indices = (*it)["indices"];
             json texCoord = (*it)["texPos"];
+            json normals = (*it)["normals"];
 
             // Allocating array for vertex and indices
-            temp.numOfVertex = 2 * points.size() + ((points.size() / 3) * 2);
+            temp.numOfVertex = 3 * points.size() + ((points.size() / 3) * 2);
             temp.vertices = (float *) malloc(temp.numOfVertex * sizeof(float));
             temp.numOfIndex = indices.size();
             temp.indices = (unsigned int *) malloc(temp.numOfIndex * sizeof(int));
@@ -93,7 +98,7 @@ void DrawHelper::loadFromFile(const char * filename) {
             } catch (const std::exception& e) {
                 temp.texture = -1;
             }
-            
+
             int tPointer = 0;
             int vPointer = 0;
             for (int i = 0; i < points.size(); i+= 3) {
@@ -111,6 +116,19 @@ void DrawHelper::loadFromFile(const char * filename) {
                     temp.vertices[vPointer + 6] = -999;
                     temp.vertices[vPointer + 7] = -999;
                 }
+
+                // if (!normals.empty()) {
+                //     temp.vertices[vPointer + 8] = (float) normals[i];
+                //     temp.vertices[vPointer + 9] = (float) normals[i+1];
+                //     temp.vertices[vPointer + 10] = (float) normals[i+2];
+                //     vPointer+=3;
+                // }
+                // else {
+                //     temp.vertices[vPointer + 8] = 0;
+                //     temp.vertices[vPointer + 9] = 0;
+                //     temp.vertices[vPointer + 10] = -1.0;
+                // }
+
                 tPointer+= 2;
                 vPointer+= 8;
             }
@@ -129,7 +147,7 @@ void DrawHelper::loadTexture(const char * filename) {
 
     // Load image
     unsigned char * data = stbi_load(filename, &width, &height, &nrChannels, 0);
-    
+
     // Gen & bind texture
     textures.push_back(0);
     glGenTextures(1, &(textures[textures.size() - 1]));
@@ -137,7 +155,7 @@ void DrawHelper::loadTexture(const char * filename) {
 
     // Parameters used specifying how the texture should be generated
     // Also tells how the mipmaps should be generated as well
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -158,7 +176,7 @@ void DrawHelper::loadTexture(const char * filename) {
     } else {
         printf("[WARN] Failed to load %s ...\n",filename);
     }
-    
+
     // Frees raw image data from memory, since it's texture is already built
     stbi_image_free(data);
 }
