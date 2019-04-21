@@ -156,7 +156,7 @@ void display()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
 
-    glm::vec3 lightPos0(0.f, 1.f, 2.f);
+    glm::vec3 lightPos0(0.f, 2.f, 2.f);
 
     shader->useProgram();
 

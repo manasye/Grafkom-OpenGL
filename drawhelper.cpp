@@ -34,16 +34,16 @@ void DrawHelper::add(Polygon polygon) {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo[ebo.size() - 1]);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, poly[poly.size() - 1].numOfIndex * (sizeof(int)), poly[poly.size() - 1].indices, GL_STATIC_DRAW);
     // Positions
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void *)0);
     glEnableVertexAttribArray(0);
     // Colors
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(3 * sizeof(float)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void *)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
     // Texture Position
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(6 * sizeof(float)));
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void *)(6 * sizeof(float)));
     glEnableVertexAttribArray(2);
     // Normal
-    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(8 * sizeof(float)));
+    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void *)(8 * sizeof(float)));
     glEnableVertexAttribArray(3);
 
     // De-bind to allow other VAO/VBO/EBO to be allocated
@@ -117,20 +117,19 @@ void DrawHelper::loadFromFile(const char * filename) {
                     temp.vertices[vPointer + 7] = -999;
                 }
 
-                // if (!normals.empty()) {
-                //     temp.vertices[vPointer + 8] = (float) normals[i];
-                //     temp.vertices[vPointer + 9] = (float) normals[i+1];
-                //     temp.vertices[vPointer + 10] = (float) normals[i+2];
-                //     vPointer+=3;
-                // }
-                // else {
-                //     temp.vertices[vPointer + 8] = 0;
-                //     temp.vertices[vPointer + 9] = 0;
-                //     temp.vertices[vPointer + 10] = -1.0;
-                // }
+                if (!normals.empty()) {
+                    temp.vertices[vPointer + 8] = (float) normals[i];
+                    temp.vertices[vPointer + 9] = (float) normals[i+1];
+                    temp.vertices[vPointer + 10] = (float) normals[i+2];
+                }
+                else {
+                    temp.vertices[vPointer + 8] = 0;
+                    temp.vertices[vPointer + 9] = 0;
+                    temp.vertices[vPointer + 10] = -1.0;
+                }
 
                 tPointer+= 2;
-                vPointer+= 8;
+                vPointer+= 11;
             }
 
             for (int i = 0; i < indices.size(); i++) {
