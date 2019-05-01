@@ -29,7 +29,7 @@ void SmokeGenerator::update(float dt, unsigned int new_particles, glm::vec3 came
         p.position += p.velocity * dt;
 
         // wind effect
-        p.position.x += -(rand() % 3)/8.0f * dt;
+        p.position.x += (rand() % 3)/8.0f * dt;
         p.position.y += -(rand() % 5 - 2)/16.0f * dt;
         p.position.z += -(rand() % 7 - 2)/8.0f * dt;
 
@@ -60,7 +60,7 @@ void SmokeGenerator::update(float dt, unsigned int new_particles, glm::vec3 came
 // Respawns particle
 void SmokeGenerator::respawnParticle(Particle &particle, glm::vec3 offset) {
   particle.life = 1.0f; // This particle will live 1 second.
-	particle.position = glm::vec3(-0.244f, -0.065f, 2.48f);
+	particle.position = glm::vec3(0.75f, -0.45f, -0.1f);
 	particle.velocity = glm::vec3(0.0f, 0.02f, 0.0f);
 
   int color = 200 + rand() % 56;

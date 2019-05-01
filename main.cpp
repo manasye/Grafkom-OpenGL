@@ -8,6 +8,7 @@
 #include <vector>
 #include "drawhelper.cpp"
 #include "rain_generator.hpp"
+#include "smoke_generator.h"
 #include "shader.hpp"
 
 #define WIDTH 800
@@ -25,6 +26,7 @@ Shader *shader;
 Shader *particleShader;
 DrawHelper drawer;
 RainGenerator * rainGenerator;
+SmokeGenerator * smokeGenerator;
 
 // Camera "distance" to object
 float radius = 5.0f;
@@ -88,6 +90,7 @@ void init()
     shader = new Shader(&vertexFile, &fragmentFile);
     particleShader = new Shader(&particleVertFile, &particleFragFile);
     rainGenerator = new RainGenerator("./data/textures/rain.png", 25000);
+    smokeGenerator = new SmokeGenerator("./data/textures/smoke.png",1000);
 
     if (shader->isProgramCompiled() == GL_FALSE)
     {
@@ -210,8 +213,10 @@ void display()
     glUniform3f(glGetUniformLocation(particleShader->getProgram(), "CameraUp_worldspace"), view[0][1], view[1][1], view[2][1]);
 
     rainGenerator->render();
+    smokeGenerator->render();
 
     glFlush();
     glutPostRedisplay();
     rainGenerator->update(delta, newparticles, cameraPos);
+    smokeGenerator->update(delta, newparticles, cameraPos);
 }

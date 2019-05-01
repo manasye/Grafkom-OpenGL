@@ -1,6 +1,6 @@
 #ifndef SMOKE_GENERATOR_H
 #define SMOKE_GENERATOR_H
-#include "particle_generator.h"
+#include "particle_generator.hpp"
 
 class SmokeGenerator : public ParticleGenerator {
 public:
