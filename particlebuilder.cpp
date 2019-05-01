@@ -127,6 +127,8 @@ ParticleBuilder::ParticleBuilder(unsigned int amount, const char*textureFile)
 	glVertexAttribDivisor(1, 1); // positions : one per quad (its center) -> 1
 	glVertexAttribDivisor(2, 1); // color : one per quad -> 1
 
+	glBindVertexArray(0);
+
 	//Init particle with amount size
 	for(auto i = 0; i < amount; i++)
 	{

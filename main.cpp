@@ -7,7 +7,7 @@
 #include <cstdio>
 #include <vector>
 #include "drawhelper.cpp"
-#include "particlebuilder.cpp"
+#include "rain_generator.hpp"
 #include "shader.hpp"
 
 #define WIDTH 800
@@ -22,8 +22,9 @@ void init();
 
 // VBO = vertex buffer object | VAO = vertex array object | EBO = element buffer object
 Shader *shader;
+Shader *particleShader;
 DrawHelper drawer;
-ParticleBuilder particleBuilder;
+RainGenerator * rainGenerator;
 
 // Camera "distance" to object
 float radius = 5.0f;
@@ -32,6 +33,7 @@ bool isDragging = false;
 int rotDX, rotDY, prevX, prevY;
 float prevRotX = 0.0f;
 float prevRotZ = 0.0f;
+unsigned int old = 0;
 
 // Keyboard rotation attribute
 int deltaKeyboard = 1;
@@ -77,17 +79,27 @@ void init()
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
-    std::ifstream vertexFile, fragmentFile;
+    std::ifstream vertexFile, fragmentFile, particleVertFile, particleFragFile;
     vertexFile.open("testvertex.vert");
     fragmentFile.open("testfragment.frag");
+    particleVertFile.open("particle.vert");
+    particleFragFile.open("particle.frag");
 
     shader = new Shader(&vertexFile, &fragmentFile);
-    particleBuilder = ParticleBuilder(50000, RAIN_TEXTURE_FILE);
+    particleShader = new Shader(&particleVertFile, &particleFragFile);
+    rainGenerator = new RainGenerator("./data/textures/rain.png", 25000);
 
     if (shader->isProgramCompiled() == GL_FALSE)
     {
         printf("Shader compilation failed...\n");
         shader->printCompileInfo();
+        exit(0);
+    }
+
+    if (particleShader->isProgramCompiled() == GL_FALSE)
+    {
+        printf("Particle shader compilation failed...\n");
+        particleShader->printCompileInfo();
         exit(0);
     }
 
@@ -164,6 +176,14 @@ void display()
 
     shader->useProgram();
 
+    unsigned int curr = glutGet(GLUT_ELAPSED_TIME);
+    float delta = (curr - old) / 1000.0f;
+    old = curr;
+
+    int newparticles = (int)(delta*10000.0);
+    		if (newparticles > (int)(0.016f*10000.0))
+    			newparticles = (int)(0.016f*10000.0);
+
     glm::vec3 cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
     glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 
@@ -181,8 +201,17 @@ void display()
     glUniform3fv(glGetUniformLocation(shader->getProgram(), "lightPos0"), 1, glm::value_ptr(lightPos0));
 
     drawer.drawAll();
-    particleBuilder.draw();
-    
+
+    particleShader->useProgram();
+
+    glUniformMatrix4fv(glGetUniformLocation(particleShader->getProgram(), "view"), 1, GL_FALSE, glm::value_ptr(view));
+    glUniformMatrix4fv(glGetUniformLocation(particleShader->getProgram(), "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+    glUniform3f(glGetUniformLocation(particleShader->getProgram(), "CameraRight_worldspace"), view[0][0], view[1][0], view[2][0]);
+    glUniform3f(glGetUniformLocation(particleShader->getProgram(), "CameraUp_worldspace"), view[0][1], view[1][1], view[2][1]);
+
+    rainGenerator->render();
+
     glFlush();
-    particleBuilder.update(0.001f, cameraPos);
+    glutPostRedisplay();
+    rainGenerator->update(delta, newparticles, cameraPos);
 }
