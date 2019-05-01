@@ -1,13 +1,55 @@
 #include <GL/glew.h>
-#include <glm/gtx/norm.hpp>
+#include <stdlib.h>
 #include "particlebuilder.hpp"
 #include <algorithm>
+
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/norm.hpp>
 
 /**
  * Reference : http://www.opengl-tutorial.org/intermediate-tutorials/billboards-particles/particles-instancing
  **/
-ParticleBuilder::ParticleBuilder(unsigned int amount)
+GLuint loadTextureFromFile(const char* filename)
 {
+	GLuint texture;
+	glGenTextures(1, &texture);
+
+	int width, height, nrChannels;
+	unsigned char* data = stbi_load(filename, &width, &height, &nrChannels, 0);
+
+	if (data){ //if data is exist and success loaded
+		glBindTexture(GL_TEXTURE_2D, texture);
+		// Parameters used specifying how the texture should be generated
+		// Also tells how the mipmaps should be generated as well
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		// The actual conversion from image to textures
+        if (nrChannels == 4) {
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+        } else {
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        }
+		glGenerateMipmap(GL_TEXTURE_2D);
+	} else {
+        printf("[WARN] Failed to load %s ...\n",filename);
+	}
+
+	stbi_image_free(data);
+	return texture;
+}
+
+ParticleBuilder::ParticleBuilder()
+{
+	//do nothing
+}
+
+ParticleBuilder::ParticleBuilder(unsigned int amount, const char*textureFile)
+{
+	this->texture = loadTextureFromFile(textureFile);
+	this->last_used_particle = 0;
     this->amount = amount;
 
     // The VBO containing the 4 vertices of the particles.
@@ -96,7 +138,7 @@ ParticleBuilder::ParticleBuilder(unsigned int amount)
 	g_particle_color_data.resize(4 * amount); //r,g,b,a
 }
 
-void ParticleBuilder::generate()
+void ParticleBuilder::draw()
 {
 	glBindVertexArray(vao);
 	glBindBuffer(GL_ARRAY_BUFFER, particles_position_buffer);
@@ -105,12 +147,17 @@ void ParticleBuilder::generate()
 	glBindBuffer(GL_ARRAY_BUFFER, particles_color_buffer);
 		glBufferSubData(GL_ARRAY_BUFFER, 0, count * sizeof(GLubyte) * 4, &g_particle_color_data[0]);
 
-	//set the texture here, we need rain/smoke texture(? .png)
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, texture);
+	glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, count);
+	glBindVertexArray(0);
 }
 
 void ParticleBuilder::sortParticles()
 {
-	std::sort(particles.begin, particles.end);
+	std::sort(particles.begin(), particles.end());
 }
 
 unsigned int ParticleBuilder::findUnusedParticle()
@@ -135,7 +182,7 @@ unsigned int ParticleBuilder::findUnusedParticle()
 	return last_used_particle;
 }
 
-void ParticleBuilder::update(float delta, glm::vec3 camera_pos, glm::vec3 offset)
+void ParticleBuilder::update(float delta, glm::vec3 camera_pos)
 {
 	count = 0;
 	for(unsigned int i = 0; i < amount; i++)

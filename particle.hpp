@@ -6,7 +6,7 @@
 struct Particle
 {
     glm::vec3 pos, speed;
-    glm::vec3 color;
+    glm::vec4 color;
     float cameradistance;
     float size, angle, weight;
     float life; //Remaining life of particle. If < 0 -> dead & unused

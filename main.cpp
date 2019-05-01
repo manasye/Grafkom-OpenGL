@@ -7,10 +7,12 @@
 #include <cstdio>
 #include <vector>
 #include "drawhelper.cpp"
+#include "particlebuilder.cpp"
 #include "shader.hpp"
 
 #define WIDTH 800
 #define HEIGHT 600
+#define RAIN_TEXTURE_FILE "./data/textures/rain.png"
 
 void handleMouseClick(int button, int state, int x, int y);
 void handleMouseMove(int x, int y);
@@ -21,6 +23,7 @@ void init();
 // VBO = vertex buffer object | VAO = vertex array object | EBO = element buffer object
 Shader *shader;
 DrawHelper drawer;
+ParticleBuilder particleBuilder;
 
 // Camera "distance" to object
 float radius = 5.0f;
@@ -79,6 +82,7 @@ void init()
     fragmentFile.open("testfragment.frag");
 
     shader = new Shader(&vertexFile, &fragmentFile);
+    particleBuilder = ParticleBuilder(50000, RAIN_TEXTURE_FILE);
 
     if (shader->isProgramCompiled() == GL_FALSE)
     {
@@ -177,6 +181,8 @@ void display()
     glUniform3fv(glGetUniformLocation(shader->getProgram(), "lightPos0"), 1, glm::value_ptr(lightPos0));
 
     drawer.drawAll();
-
+    particleBuilder.draw();
+    
     glFlush();
+    particleBuilder.update(0.001f, cameraPos);
 }
